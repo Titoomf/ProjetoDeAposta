@@ -5,14 +5,12 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -24,18 +22,19 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.MaskFormatter;
 
+import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.components.DateTimePicker;
 
 import controller.ControladoraCliente;
 import model.VO.Cliente;
+import model.seletor.ClienteSeletor;
 
 @SuppressWarnings("serial")
 
@@ -43,13 +42,16 @@ public class TelaCadastroCliente extends JPanel {
 	private Cliente clienteAlterado = new Cliente();
 	private JTextField txtNome;
 	private JButton btnLimpar;
+	private DatePicker datanascimento;
 	private JButton btnRelatorio;
 	private JTable tblConsultaCliente;
 	private ArrayList<Cliente> clientes;
+	private ArrayList<Cliente> consultarCliente;
 	private JFormattedTextField fmtTelefone;
 	protected int linhaSelecionada;
 	private JFormattedTextField fmtCpf;
 	private JTextField txtValor;
+	private ClienteSeletor seletor = new ClienteSeletor();
 	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
 	public TelaCadastroCliente() {
@@ -58,6 +60,7 @@ public class TelaCadastroCliente extends JPanel {
 
 		this.setBorder(new EmptyBorder(5, 5, 5, 5));
 		JButton btnExcluirCliente = new JButton("Excluir ");
+		btnExcluirCliente.setBounds(266, 593, 118, 41);
 		btnExcluirCliente.setIcon(new ImageIcon(TelaCadastroCliente.class.getResource("/icons/icons8-excluir-32.png")));
 		btnExcluirCliente.addActionListener(new ActionListener() {
 
@@ -89,6 +92,7 @@ public class TelaCadastroCliente extends JPanel {
 		});
 
 		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(15, 360, 522, 230);
 
 		JPanel panel = new JPanel();
 		panel.addMouseListener(new MouseAdapter() {
@@ -101,24 +105,31 @@ public class TelaCadastroCliente extends JPanel {
 		tblConsultaCliente.setBorder(new LineBorder(new Color(0, 0, 0)));
 
 		JLabel lblCpf = new JLabel("CPF :");
+		lblCpf.setBounds(42, 64, 46, 14);
 
 		JLabel lblCadastroDeCliente = new JLabel("Cadastro De Cliente");
+		lblCadastroDeCliente.setBounds(330, 25, 285, 30);
 		lblCadastroDeCliente.setFont(new Font("Verdana", Font.ITALIC, 16));
 
 		JLabel lblNome = new JLabel("Nome :");
+		lblNome.setBounds(42, 25, 46, 14);
 
 		txtNome = new JTextField();
+		txtNome.setBounds(88, 22, 179, 22);
 		txtNome.setColumns(10);
 
 		JLabel lblTelefone = new JLabel("Telefone :");
+		lblTelefone.setBounds(15, 112, 66, 17);
 
 		DatePickerSettings dateSettings = new DatePickerSettings();
 		dateSettings.setAllowKeyboardEditing(false);
 
 		final DateTimePicker dataTeste = new DateTimePicker(dateSettings, null);
+		dataTeste.setBounds(25, 179, 183, 37);
 		dataTeste.getDatePicker().getComponentToggleCalendarButton().setForeground(Color.BLACK);
 
 		JButton btnSalvar = new JButton("Salva");
+		btnSalvar.setBounds(178, 246, 117, 49);
 		btnSalvar.setIcon(new ImageIcon(
 				TelaCadastroCliente.class.getResource("/icons/icons8-adicionar-usu\u00E1rio-masculino.png")));
 		btnSalvar.addActionListener(new ActionListener() {
@@ -149,15 +160,16 @@ public class TelaCadastroCliente extends JPanel {
 					msg = controladora.salvar(cliente);
 					JOptionPane.showMessageDialog(null, msg);
 
-					atualizarTabelaClientes();
+					atualizarTabelaClientes(clientes);
 				} else {
-					JOptionPane.showMessageDialog(null, mensagem, "Cadastrar cliente", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(null, mensagem, "cliente cadastrado com sucesso", JOptionPane.INFORMATION_MESSAGE);
 				}
 
 			}
 		});
 
 		btnLimpar = new JButton("Limpar");
+		btnLimpar.setBounds(140, 592, 114, 42);
 		btnLimpar.setIcon(new ImageIcon(TelaCadastroCliente.class.getResource("/icons/icons8-apagar-24.png")));
 		btnLimpar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -166,17 +178,22 @@ public class TelaCadastroCliente extends JPanel {
 				fmtTelefone.setText("");
 				fmtCpf.setText("");
 
+				limparTabela();
+
 			}
 		});
 
 		JSeparator separator = new JSeparator();
 
 		JSeparator separator_2 = new JSeparator();
+		separator_2.setBounds(578, 325, 20, 299);
 		separator_2.setOrientation(SwingConstants.VERTICAL);
 
 		JSeparator separator_1 = new JSeparator();
+		separator_1.setBounds(5, 323, 565, 10);
 
 		JLabel lblConsultaDeCliente = new JLabel("Consulta de Cliente");
+		lblConsultaDeCliente.setBounds(154, 333, 196, 14);
 		lblConsultaDeCliente.setForeground(Color.BLACK);
 		lblConsultaDeCliente.setFont(new Font("Verdana", Font.ITALIC, 16));
 		construirTabelaClientes();
@@ -185,13 +202,16 @@ public class TelaCadastroCliente extends JPanel {
 			MaskFormatter mascaraTelefone = new MaskFormatter("(##)#####-####");
 			MaskFormatter mascaraCpf = new MaskFormatter("###.###.###-##");
 			fmtTelefone = new JFormattedTextField(mascaraTelefone);
+			fmtTelefone.setBounds(88, 110, 179, 20);
 
 			fmtCpf = new JFormattedTextField(mascaraCpf);
+			fmtCpf.setBounds(88, 61, 179, 20);
 
 		} catch (ParseException e) {
 		}
 
 		JLabel lblDataNascimento = new JLabel("Data Nascimento :");
+		lblDataNascimento.setBounds(15, 150, 133, 16);
 
 		try {
 
@@ -201,12 +221,15 @@ public class TelaCadastroCliente extends JPanel {
 			e.printStackTrace();
 		}
 		txtValor = new JNumberFormatField();
+		txtValor.setBounds(15, 252, 116, 37);
 		txtValor.setColumns(10);
 
-		JLabel lblDeposito = new JLabel("Deposito :");
+		JLabel lblDeposito = new JLabel("Dep\u00F3sito :");
+		lblDeposito.setBounds(15, 218, 133, 16);
 		lblDeposito.setFont(new Font("Tahoma", Font.PLAIN, 15));
 
 		btnRelatorio = new JButton("Gerar Relatorio");
+		btnRelatorio.setBounds(400, 593, 149, 40);
 		btnRelatorio.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser jcf = new JFileChooser();
@@ -223,131 +246,108 @@ public class TelaCadastroCliente extends JPanel {
 
 		});
 
-		 JButton btnEditar = new JButton("editar");
-		btnEditar.addActionListener(new ActionListener() {
+		JButton btnConsultar = new JButton("Consultar");
+		btnConsultar.setBounds(302, 247, 105, 46);
+		btnConsultar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
-				int linhaSelecionadaNaTabela = tblConsultaCliente.getSelectedRow();
-				Cliente clienteSelecionado = clientes.get(linhaSelecionadaNaTabela - 1);
+				String nomeCliente = txtNome.getText().toUpperCase();
+				String telefoneCliente = fmtTelefone.getText();
+				String valorCliente = txtValor.getText();
+				valorCliente = valorCliente.replaceAll(",", ".");
+				valorCliente = valorCliente.replace("R$ ", "");
+				Double valor = Double.parseDouble(valorCliente);
+				LocalDate datanascimento = dataTeste.getDatePicker().getDate();
 
-				JOptionPane.showMessageDialog(null, "Chamar a tela de edição e passar o objeto clienteSelecionado...");
+				telefoneCliente = telefoneCliente.replaceAll("\\(", "");
+				telefoneCliente = telefoneCliente.replaceAll("\\)", "");
+				telefoneCliente = telefoneCliente.replaceAll("-", "");
+				String cpfCliente = fmtCpf.getText();
+				cpfCliente = cpfCliente.replaceAll(".", "");
+				cpfCliente = cpfCliente.replaceAll("-", "");
+
+				ControladoraCliente controller = new ControladoraCliente();
+				ClienteSeletor seletor = new ClienteSeletor();
+
+				seletor.setNomeCliente(nomeCliente);
+				seletor.setTelefoneCliente(telefoneCliente);
+				seletor.setCpfCliente(cpfCliente);
+
+				List<Cliente> cliente = controller.listarCliente(seletor);
+
+				atualizarTabelaClientes(cliente);
+
+				tblConsultaCliente.getColumnModel().getColumn(0).setPreferredWidth(100);
+				tblConsultaCliente.getColumnModel().getColumn(1).setPreferredWidth(101);
+				tblConsultaCliente.getColumnModel().getColumn(2).setPreferredWidth(100);
+				tblConsultaCliente.getColumnModel().getColumn(3).setPreferredWidth(102);
+				tblConsultaCliente.getColumnModel().getColumn(4).setPreferredWidth(90);
+
 			}
-
-	//	});
-//		btnEditar.addMouseListener(new MouseAdapter() {
-			//@Override
-		//	public void mouseClicked(MouseEvent e) {
-				//int indiceSelecionado = tblConsultaCliente.getSelectedRow();
-
-				//if (indiceSelecionado > 0) {
-				//	btnEditar.setEnabled(true);
-				//} else {
-				//	btnEditar.setEnabled(false);
-				//}
-			//}
-
 		});
-		GroupLayout groupLayout = new GroupLayout(this);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING).addGroup(groupLayout
-				.createSequentialGroup()
-				.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup().addGap(37)
-								.addComponent(lblNome, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE)
-								.addComponent(txtNome, GroupLayout.PREFERRED_SIZE, 179, GroupLayout.PREFERRED_SIZE)
-								.addGap(63).addComponent(lblCadastroDeCliente, GroupLayout.PREFERRED_SIZE, 285,
-										GroupLayout.PREFERRED_SIZE))
-						.addGroup(groupLayout.createSequentialGroup().addGap(37)
-								.addComponent(lblCpf, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE)
-								.addComponent(fmtCpf, GroupLayout.PREFERRED_SIZE, 179, GroupLayout.PREFERRED_SIZE))
-						.addGroup(groupLayout.createSequentialGroup().addGap(10)
-								.addComponent(lblTelefone, GroupLayout.PREFERRED_SIZE, 66, GroupLayout.PREFERRED_SIZE)
-								.addGap(7)
-								.addComponent(fmtTelefone, GroupLayout.PREFERRED_SIZE, 179, GroupLayout.PREFERRED_SIZE))
-						.addComponent(separator_1, GroupLayout.PREFERRED_SIZE, 565, GroupLayout.PREFERRED_SIZE)
-						.addGroup(groupLayout.createSequentialGroup().addGap(10).addGroup(groupLayout
-								.createParallelGroup(Alignment.LEADING)
-								.addGroup(groupLayout.createSequentialGroup().addGap(139).addComponent(
-										lblConsultaDeCliente, GroupLayout.PREFERRED_SIZE, 196,
-										GroupLayout.PREFERRED_SIZE))
-								.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 522, GroupLayout.PREFERRED_SIZE)
-								.addGroup(groupLayout.createSequentialGroup().addGap(28)
-										.addComponent(btnLimpar, GroupLayout.PREFERRED_SIZE, 114,
-												GroupLayout.PREFERRED_SIZE)
-										.addGap(62)
-										.addComponent(btnExcluirCliente, GroupLayout.PREFERRED_SIZE, 118,
-												GroupLayout.PREFERRED_SIZE)
-										.addGap(63).addComponent(btnRelatorio, GroupLayout.PREFERRED_SIZE, 149,
-												GroupLayout.PREFERRED_SIZE)))
-								.addGap(29)
-								.addComponent(separator_2, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE))
-						.addGroup(groupLayout.createSequentialGroup().addGap(10).addGroup(groupLayout
-								.createParallelGroup(Alignment.LEADING)
-								.addComponent(lblDeposito, GroupLayout.PREFERRED_SIZE, 133, GroupLayout.PREFERRED_SIZE)
-								.addGroup(groupLayout.createSequentialGroup()
-										.addComponent(txtValor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-												GroupLayout.PREFERRED_SIZE)
-										.addGap(47).addComponent(btnSalvar).addGap(7).addComponent(btnEditar,
-												GroupLayout.PREFERRED_SIZE, 105, GroupLayout.PREFERRED_SIZE))))
-						.addGroup(groupLayout.createSequentialGroup().addGap(10).addComponent(lblDataNascimento,
-								GroupLayout.PREFERRED_SIZE, 133, GroupLayout.PREFERRED_SIZE))
-						.addGroup(groupLayout.createSequentialGroup().addGap(20).addComponent(dataTeste,
-								GroupLayout.PREFERRED_SIZE, 183, GroupLayout.PREFERRED_SIZE)))
-				.addContainerGap(148, Short.MAX_VALUE)));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING).addGroup(groupLayout
-				.createSequentialGroup().addGap(17)
-				.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup().addGap(3).addComponent(lblNome,
-								GroupLayout.PREFERRED_SIZE, 14, GroupLayout.PREFERRED_SIZE))
-						.addComponent(txtNome, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-								GroupLayout.PREFERRED_SIZE)
-						.addGroup(groupLayout.createSequentialGroup().addGap(3).addComponent(lblCadastroDeCliente,
-								GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)))
-				.addGap(6)
-				.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup().addGap(3).addComponent(lblCpf,
-								GroupLayout.PREFERRED_SIZE, 14, GroupLayout.PREFERRED_SIZE))
-						.addComponent(fmtCpf, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE))
-				.addGap(29)
-				.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup().addGap(2).addComponent(lblTelefone,
-								GroupLayout.PREFERRED_SIZE, 17, GroupLayout.PREFERRED_SIZE))
-						.addComponent(fmtTelefone, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE))
-				.addGap(20).addComponent(lblDataNascimento).addGap(13)
-				.addComponent(dataTeste, GroupLayout.PREFERRED_SIZE, 37, GroupLayout.PREFERRED_SIZE).addGap(2)
-				.addComponent(lblDeposito, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE).addGap(12)
-				.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-						.addComponent(txtValor, GroupLayout.PREFERRED_SIZE, 37, GroupLayout.PREFERRED_SIZE)
-						.addComponent(btnSalvar, GroupLayout.PREFERRED_SIZE, 49, GroupLayout.PREFERRED_SIZE)
-						.addComponent(btnEditar, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE))
-				.addGap(28)
-				.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup().addGap(2).addComponent(separator_2,
-								GroupLayout.PREFERRED_SIZE, 299, GroupLayout.PREFERRED_SIZE))
-						.addGroup(groupLayout.createSequentialGroup().addGroup(groupLayout
-								.createParallelGroup(Alignment.LEADING)
-								.addGroup(groupLayout.createSequentialGroup().addGap(10)
-										.addComponent(lblConsultaDeCliente, GroupLayout.PREFERRED_SIZE, 14,
-												GroupLayout.PREFERRED_SIZE)
-										.addGap(13).addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 230,
-												GroupLayout.PREFERRED_SIZE))
-								.addComponent(separator_1, GroupLayout.PREFERRED_SIZE, 10, GroupLayout.PREFERRED_SIZE))
-								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING).addGroup(groupLayout
-										.createSequentialGroup().addGap(3)
-										.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-												.addComponent(btnRelatorio, GroupLayout.PREFERRED_SIZE, 40,
-														GroupLayout.PREFERRED_SIZE)
-												.addComponent(btnExcluirCliente)))
-										.addGroup(groupLayout.createSequentialGroup()
-												.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnLimpar,
-														GroupLayout.PREFERRED_SIZE, 42, GroupLayout.PREFERRED_SIZE)))))
-				.addContainerGap()));
-		setLayout(groupLayout);
+		txtNome.setText("");
+		txtValor.setText("");
+		fmtTelefone.setText("");
+		fmtCpf.setText("");
+		setLayout(null);
+		add(lblNome);
+		add(txtNome);
+		add(lblCadastroDeCliente);
+		add(lblCpf);
+		add(fmtCpf);
+		add(lblTelefone);
+		add(fmtTelefone);
+		add(separator_1);
+		add(lblConsultaDeCliente);
+		add(scrollPane);
+		add(btnLimpar);
+		add(btnExcluirCliente);
+		add(btnRelatorio);
+		add(separator_2);
+		add(lblDeposito);
+		add(txtValor);
+		add(btnSalvar);
+		add(btnConsultar);
+		add(lblDataNascimento);
+		add(dataTeste);
+
+		JButton btnEditar = new JButton("Editar");
+		btnEditar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				Cliente c = new Cliente();
+				String cpf = null;
+
+				int selRow = tblConsultaCliente.getSelectedRow();
+				if (selRow >= 0) {
+					cpf = tblConsultaCliente.getModel().getValueAt(selRow, 0).toString();
+				}
+
+				if (cpf == null) {
+					c.setNome(cpf);
+				}
+				c.setNome(txtNome.getText());
+				c.setTelefone(fmtTelefone.getText());
+				c.setCpf(fmtCpf.getText());
+
+				ControladoraCliente clienteController = new ControladoraCliente();
+				String mensagem = clienteController.atualizarBusca(c);
+				JOptionPane.showMessageDialog(null, mensagem);
+
+				txtNome.setText("");
+				fmtTelefone.setText("");
+				fmtCpf.setText("");
+				txtValor.setText("");
+
+				limparTabela();
+			}
+		});
+		btnEditar.setBounds(25, 590, 105, 46);
+		add(btnEditar);
 
 	}
 
-	protected void atualizarTabelaClientes() {
-		ControladoraCliente controller = new ControladoraCliente();
-		clientes = controller.consultarTodos();
+	protected void atualizarTabelaClientes(List<Cliente> clientes) {
+
 		construirTabelaClientes();
 		DefaultTableModel model = (DefaultTableModel) tblConsultaCliente.getModel();
 		for (Cliente cliente : clientes) {
@@ -370,6 +370,9 @@ public class TelaCadastroCliente extends JPanel {
 
 	private void construirTabelaClientes() {
 
+		consultarCliente = clientes;
+		this.limparTabela();
+
 		tblConsultaCliente.setModel(
 				new DefaultTableModel(new Object[][] { { "Nome", "telefone", "CPF ", "DataNascimento", "valor" }, },
 						new String[] { "Nome", "telefone", "CPF ", "DataNascimento", "valor" }) {
@@ -386,4 +389,11 @@ public class TelaCadastroCliente extends JPanel {
 		tblConsultaCliente.getColumnModel().getColumn(4).setPreferredWidth(90);
 
 	}
+
+	private void limparTabela() {
+		tblConsultaCliente.setModel(
+				new DefaultTableModel(new String[][] { { "Nome", "Telefone", "CPF", "DataNasciemnto", "Valor" }, },
+						new String[] { "Nome", "Telefone", "CPF", "DataNasciemnto", "Valor" }));
+	}
+
 }

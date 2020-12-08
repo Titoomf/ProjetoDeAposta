@@ -4,26 +4,27 @@ import java.util.ArrayList;
 
 import model.DAO.ClienteDAO;
 import model.VO.Cliente;
+import model.seletor.ClienteSeletor;
 
 public class ClienteBO {
 	ClienteDAO dao = new ClienteDAO();
 
-	public String salvar(Cliente cliente) {
-		String msg = "";
-		int resultado = 0;
-		ClienteDAO dao = new ClienteDAO();
-		if (dao.consultarCpfCliente(cliente.getCpf())) {
-			msg += ("Este cpf ja foi utilizado ");
-		} else {
-			resultado = dao.salvar(cliente);
-		}
-		if (resultado > -1) {
-			msg += ("Cliente cadastrado com sucesso");
-		} else {
+	public String salvar(Cliente novoCliente) {
+		String mensagem = "";
 
+		if (dao.consultarCpfCliente(novoCliente.getCpf())) {
+			mensagem = "O CPF informado já pertence a outro cliente";
+		} else {
+			novoCliente = dao.salvar(novoCliente);
+
+			if (novoCliente.getIdCliente() > 0) {
+				mensagem = "Cliente cadastrado com sucesso";
+			} else {
+				mensagem = "Erro ao cadastrar cliente. Entre em contato com o administrador do sistema.";
+			}
 		}
-		System.out.println(resultado);
-		return msg;
+
+		return mensagem;
 	}
 
 	public ArrayList<Cliente> consultarTodos() {
@@ -44,9 +45,12 @@ public class ClienteBO {
 		return mensagem;
 	}
 
-	public static boolean alterar(Cliente clienteselecionado) {
-		// TODO Auto-generated method stub
-		return  ClienteDAO.alterar(clienteselecionado);
+	public ArrayList<Cliente> listaClientes(ClienteSeletor seletor) {
+		return dao.listarComSeletor(seletor);
+	}
+
+	public boolean atualizarBusca(Cliente cliente) {
+		return dao.atualizarBusca(cliente);
 	}
 
 }

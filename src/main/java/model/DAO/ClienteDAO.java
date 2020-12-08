@@ -9,13 +9,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import model.VO.Cliente;
+import model.seletor.ClienteSeletor;
 
 public class ClienteDAO {
-	public int salvar(Cliente cliente) {
+	public Cliente salvar(Cliente cliente) {
 		Connection conn = Banco.getConnection();
 		String sql = "INSERT INTO CLIENTE (NOME,TELEFONE,CPF ,DATANASCIMENTO,VALOR) VALUES (?,?,?,?,?)";
 		PreparedStatement Prepstmt = Banco.getPreparedStatement(conn, sql);
-		int resultado = 0;
+		
 		try {
 			Prepstmt.setString(1, cliente.getNome());
 			Prepstmt.setString(2, cliente.getTelefone());
@@ -37,33 +38,7 @@ public class ClienteDAO {
 
 		}
 
-		return resultado;
-	}
-
-	public static boolean alterar(Cliente cliente) {
-		String sql = " UPDATE CLIENTE " + " SET NOME=?,TELEFONE=?,CPF=?,DATANASCIMENTO=?, VALOR=? "
-				+ " WHERE IDCLIENTE=? ";
-
-		boolean alterou = false;
-
-		try (Connection conexao = Banco.getConnection();
-				PreparedStatement query = Banco.getPreparedStatement(conexao, sql);) {
-			query.setString(1, cliente.getNome());
-			query.setString(2, cliente.getTelefone());
-			query.setString(3, cliente.getCpf());
-			query.setDate(4, Date.valueOf(cliente.DataNascimento));
-			query.setDouble(5, cliente.getValor());
-			query.setInt(6, cliente.getIdCliente());
-
-			System.out.println(sql);
-
-			int codigoRetorno = query.executeUpdate();
-			alterou = (codigoRetorno == Banco.CODIGO_RETORNO_SUCESSO);
-		} catch (SQLException e) {
-			System.out.println("Erro ao alterar cliente.\nCausa: " + e.getMessage());
-		}
-
-		return alterou;
+		return cliente;
 	}
 
 	public ArrayList<Cliente> consultarTodos() {
@@ -178,5 +153,132 @@ public class ClienteDAO {
 		return false;
 	}
 
+	public ArrayList<Cliente> listarComSeletor(ClienteSeletor filtro) {
+		String sql = "SELECT * FROM CLIENTE";
 
+		if (filtro.temFiltro()) {
+			String nomeCliente = (filtro.getNomeCliente().trim().length() > 0) ? filtro.getNomeCliente().trim() : "";
+			String cpfCliente = (filtro.getCpfCliente().trim().length() > 0) ? filtro.getCpfCliente() : "";
+			String telefoneCliente = (filtro.gettelefoneCliente().trim().length() > 0) ? filtro.gettelefoneCliente().trim() : "";
+			
+
+			boolean primeiroFiltro = false;
+
+			if (nomeCliente.length() > 0) {
+				if (!primeiroFiltro) {
+					sql = sql.concat(" WHERE ");
+					primeiroFiltro = true;
+				} else {
+					sql = sql.concat(" AND ");
+				}
+				sql = sql.concat(" nome LIKE '%");
+				sql = sql.concat(nomeCliente + "%' ");
+			}
+			if (telefoneCliente.length() > 0) {
+				if (!primeiroFiltro) {
+					sql = sql.concat(" WHERE ");
+					primeiroFiltro = true;
+				} else {
+					sql = sql.concat(" AND ");
+				}
+				sql = sql.concat(" telefone LIKE '%");
+				sql = sql.concat(nomeCliente + "%' ");
+			}
+
+		
+
+			if (cpfCliente.length() > 0) {
+				if (!primeiroFiltro) {
+					sql = sql.concat(" WHERE ");
+					primeiroFiltro = true;
+				} else {
+					sql = sql.concat(" AND ");
+				}
+				sql = sql.concat(" cpf LIKE '%");
+				sql = sql.concat(cpfCliente + "%'");
+			}
+
+		}
+
+		Connection conn = Banco.getConnection();
+		Statement stmt = Banco.getStatement(conn);
+		ResultSet result = null;
+		ArrayList<Cliente> lista = new ArrayList<Cliente>();
+
+		try {
+			result = stmt.executeQuery(sql);
+			while (result.next()) {
+				Cliente cliente = new Cliente();
+				cliente.setIdCliente(result.getInt("IDCLIENTE"));
+				cliente.setNome(result.getString("NOME"));
+				cliente.setTelefone(result.getString("TELEFONE"));
+				cliente.setCpf(result.getString("CPF"));
+				cliente.setDataNascimento(result.getDate("DataNascimento").toLocalDate());
+				cliente.setValor(result.getDouble("valor"));
+
+				lista.add(cliente);
+			}
+		} catch (SQLException e) {
+			System.out.println("Erro ao carregar lista de usuários.\nCausa: " + e.getMessage());
+		} finally {
+			Banco.closeResultSet(result);
+			Banco.closeStatement(stmt);
+			Banco.closeConnection(conn);
+		}
+		return lista;
+
+	}
+
+	public boolean atualizarBusca(Cliente cliente) {
+		Connection conexao = Banco.getConnection();
+
+		String sql = " UPDATE CLIENTE " + " SET NOME=?,TELEFONE=?,CPF=?" + " WHERE IDCLIENTE=? ";
+
+		PreparedStatement query = Banco.getPreparedStatement(conexao, sql);
+
+		boolean atualizou = false;
+		try {
+			query.setString(1, cliente.getNome());
+			query.setString(2, cliente.getTelefone());
+			query.setString(3, cliente.getCpf());
+			query.setInt(4, cliente.getIdCliente());
+
+			int codigoRetorno = query.executeUpdate();
+			atualizou = (codigoRetorno == Banco.CODIGO_RETORNO_SUCESSO);
+
+		} catch (SQLException e) {
+			System.out.println("Erro ao atualizar cliente.\nCausa: " + e.getMessage());
+		} finally {
+			Banco.closeStatement(query);
+			Banco.closeConnection(conexao);
+		}
+
+		return atualizou;
+	}
+
+	public Cliente pesquisarPorNome(String nome) {
+		Connection conexao = Banco.getConnection();
+		String sql = " SELECT * FROM CLIENTE " + " WHERE NOME=? ";
+
+		PreparedStatement query = Banco.getPreparedStatement(conexao, sql);
+
+		Cliente pessoa = null;
+		try {
+			query.setString(1, nome);
+
+			ResultSet rs = query.executeQuery();
+			if (rs.next()) {
+				pessoa = this.construirDoResultSet(rs);
+			}
+		} catch (SQLException e) {
+			System.out.println("Erro ao consultar Cliente por nome.\nCausa: " + e.getMessage());
+		} finally {
+			Banco.closeStatement(query);
+			Banco.closeConnection(conexao);
+		}
+
+		return pessoa;
+	}
+
+	
 }
