@@ -39,7 +39,7 @@ import model.seletor.ClienteSeletor;
 @SuppressWarnings("serial")
 
 public class TelaCadastroCliente extends JPanel {
-	
+
 	private JTextField txtNome;
 	private JButton btnLimpar;
 	private DatePicker datanascimento;
@@ -51,6 +51,7 @@ public class TelaCadastroCliente extends JPanel {
 	protected int linhaSelecionada;
 	private JFormattedTextField fmtCpf;
 	private JTextField txtValor;
+	private JButton btnExcluirCliente;
 	private ClienteSeletor seletor = new ClienteSeletor();
 	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
@@ -59,18 +60,16 @@ public class TelaCadastroCliente extends JPanel {
 		setBounds(0, 0, 768, 630);
 
 		this.setBorder(new EmptyBorder(5, 5, 5, 5));
-		JButton btnExcluirCliente = new JButton("Excluir ");
+		btnExcluirCliente = new JButton("Excluir ");
 		btnExcluirCliente.setBounds(266, 593, 118, 41);
 		btnExcluirCliente.setIcon(new ImageIcon(TelaCadastroCliente.class.getResource("/icons/icons8-excluir-32.png")));
 		btnExcluirCliente.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent e) {
-
 				DefaultTableModel model = (DefaultTableModel) tblConsultaCliente.getModel();
 				int valorBotao = JOptionPane.YES_NO_OPTION;
 				valorBotao = JOptionPane.showConfirmDialog(null, "deseja realmente excluir este cliente?",
 						"CONFIRMAÇÃO", valorBotao);
-				if (valorBotao == JOptionPane.YES_OPTION) {
+				if (valorBotao == JOptionPane.YES_NO_OPTION) {
 					if (tblConsultaCliente.getSelectedRow() >= 0) {
 						linhaSelecionada = tblConsultaCliente.getSelectedRow();
 						Cliente clienteSelecionado = clientes.get(linhaSelecionada - 1);
@@ -157,10 +156,11 @@ public class TelaCadastroCliente extends JPanel {
 				if (mensagem.isEmpty()) {
 					Cliente cliente = new Cliente(nomeCliente, telefoneCliente, cpfCliente, datanascimento, valor);
 					msg = controladora.salvar(cliente);
-				}
-				JOptionPane.showMessageDialog(null, msg);
-
+					JOptionPane.showMessageDialog(null, msg);
+				} else
+					JOptionPane.showMessageDialog(null, mensagem);
 			}
+			
 		});
 
 		btnLimpar = new JButton("Limpar");
@@ -236,7 +236,7 @@ public class TelaCadastroCliente extends JPanel {
 
 					ControladoraCliente controllerCliente = new ControladoraCliente();
 					controllerCliente.gerarRelatorio(clientes, caminhoEscolhido);
-					
+
 					JOptionPane.showConfirmDialog(null, "sALVOU");
 				}
 			}
