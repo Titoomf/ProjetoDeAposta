@@ -17,7 +17,7 @@ public class ClienteBO {
 		} else {
 			novoCliente = dao.salvar(novoCliente);
 
-			if (novoCliente.getIdCliente() > 0) {
+			if (novoCliente.getIdCliente() > -1) {
 				mensagem = "Cliente cadastrado com sucesso";
 			} else {
 				mensagem = "Erro ao cadastrar cliente. Entre em contato com o administrador do sistema.";

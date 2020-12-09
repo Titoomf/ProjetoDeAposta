@@ -39,7 +39,7 @@ import model.seletor.ClienteSeletor;
 @SuppressWarnings("serial")
 
 public class TelaCadastroCliente extends JPanel {
-	private Cliente clienteAlterado = new Cliente();
+	
 	private JTextField txtNome;
 	private JButton btnLimpar;
 	private DatePicker datanascimento;
@@ -69,9 +69,8 @@ public class TelaCadastroCliente extends JPanel {
 				DefaultTableModel model = (DefaultTableModel) tblConsultaCliente.getModel();
 				int valorBotao = JOptionPane.YES_NO_OPTION;
 				valorBotao = JOptionPane.showConfirmDialog(null, "deseja realmente excluir este cliente?",
-						"CONFIRMACAO", valorBotao);
+						"CONFIRMAÇÃO", valorBotao);
 				if (valorBotao == JOptionPane.YES_OPTION) {
-
 					if (tblConsultaCliente.getSelectedRow() >= 0) {
 						linhaSelecionada = tblConsultaCliente.getSelectedRow();
 						Cliente clienteSelecionado = clientes.get(linhaSelecionada - 1);
@@ -129,7 +128,7 @@ public class TelaCadastroCliente extends JPanel {
 		dataTeste.getDatePicker().getComponentToggleCalendarButton().setForeground(Color.BLACK);
 
 		JButton btnSalvar = new JButton("Salva");
-		btnSalvar.setBounds(178, 246, 117, 49);
+		btnSalvar.setBounds(140, 246, 155, 49);
 		btnSalvar.setIcon(new ImageIcon(
 				TelaCadastroCliente.class.getResource("/icons/icons8-adicionar-usu\u00E1rio-masculino.png")));
 		btnSalvar.addActionListener(new ActionListener() {
@@ -158,12 +157,8 @@ public class TelaCadastroCliente extends JPanel {
 				if (mensagem.isEmpty()) {
 					Cliente cliente = new Cliente(nomeCliente, telefoneCliente, cpfCliente, datanascimento, valor);
 					msg = controladora.salvar(cliente);
-					JOptionPane.showMessageDialog(null, msg);
-
-					atualizarTabelaClientes(clientes);
-				} else {
-					JOptionPane.showMessageDialog(null, mensagem, "cliente cadastrado com sucesso", JOptionPane.INFORMATION_MESSAGE);
 				}
+				JOptionPane.showMessageDialog(null, msg);
 
 			}
 		});
@@ -241,13 +236,17 @@ public class TelaCadastroCliente extends JPanel {
 
 					ControladoraCliente controllerCliente = new ControladoraCliente();
 					controllerCliente.gerarRelatorio(clientes, caminhoEscolhido);
+					
+					JOptionPane.showConfirmDialog(null, "sALVOU");
 				}
 			}
 
 		});
 
 		JButton btnConsultar = new JButton("Consultar");
-		btnConsultar.setBounds(302, 247, 105, 46);
+		btnConsultar.setIcon(
+				new ImageIcon(TelaCadastroCliente.class.getResource("/icons/icons8-lista-com-marcadores.png")));
+		btnConsultar.setBounds(335, 247, 149, 46);
 		btnConsultar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -314,31 +313,7 @@ public class TelaCadastroCliente extends JPanel {
 		JButton btnEditar = new JButton("Editar");
 		btnEditar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				Cliente c = new Cliente();
-				String cpf = null;
 
-				int selRow = tblConsultaCliente.getSelectedRow();
-				if (selRow >= 0) {
-					cpf = tblConsultaCliente.getModel().getValueAt(selRow, 0).toString();
-				}
-
-				if (cpf == null) {
-					c.setNome(cpf);
-				}
-				c.setNome(txtNome.getText());
-				c.setTelefone(fmtTelefone.getText());
-				c.setCpf(fmtCpf.getText());
-
-				ControladoraCliente clienteController = new ControladoraCliente();
-				String mensagem = clienteController.atualizarBusca(c);
-				JOptionPane.showMessageDialog(null, mensagem);
-
-				txtNome.setText("");
-				fmtTelefone.setText("");
-				fmtCpf.setText("");
-				txtValor.setText("");
-
-				limparTabela();
 			}
 		});
 		btnEditar.setBounds(25, 590, 105, 46);
